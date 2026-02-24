@@ -1,0 +1,47 @@
+#define trigPin 9
+#define echoPin 10
+
+float maxDepth = 20.0;  // Change based on your container depth
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  float distance = duration * 0.034 / 2;
+
+  float waterLevel = maxDepth - distance;
+  float percentage = (waterLevel / maxDepth) * 100;
+
+  if (percentage < 0) percentage = 0;
+  if (percentage > 100) percentage = 100;
+
+  Serial.println("---------------");
+  Serial.print("Water Level = ");
+  Serial.print(percentage);
+  Serial.println(" %");
+
+  if (percentage < 50) {
+    Serial.println("Risk = SAFE");
+  }
+  else if (percentage >= 50 && percentage < 80) {
+    Serial.println("Risk = WARNING");
+  }
+  else {
+    Serial.println("Risk = HIGH");
+    Serial.println("Message Sent to Authorities");
+  }
+
+  delay(3000);
+}

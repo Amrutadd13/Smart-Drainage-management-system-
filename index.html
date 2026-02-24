@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Drainage Digital Twin</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            width: 70%;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+        }
+
+        .safe { color: green; }
+        .warning { color: orange; }
+        .high { color: red; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<h1>Smart Drainage Management Digital Twin</h1>
+
+<div class="container">
+
+    <div class="card">
+        <h2 id="waterLevel">Water Level: -- %</h2>
+        <h2 id="riskStatus">Risk: --</h2>
+    </div>
+
+    <canvas id="waterChart"></canvas>
+
+</div>
+
+<script>
+
+    let ctx = document.getElementById('waterChart').getContext('2d');
+
+    let waterData = {
+        labels: [],
+        datasets: [{
+            label: 'Water Level (%)',
+            data: [],
+            borderColor: 'blue',
+            fill: false,
+            tension: 0.2
+        }]
+    };
+
+    let waterChart = new Chart(ctx, {
+        type: 'line',
+        data: waterData,
+        options: {
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    function updateDashboard(waterLevel) {
+
+        document.getElementById("waterLevel").innerText =
+            "Water Level: " + waterLevel + " %";
+
+        let riskText = "";
+        let riskClass = "";
+
+        if (waterLevel < 50) {
+            riskText = "SAFE";
+            riskClass = "safe";
+        }
+        else if (waterLevel < 80) {
+            riskText = "WARNING";
+            riskClass = "warning";
+        }
+        else {
+            riskText = "HIGH - Message Sent to Authorities";
+            riskClass = "high";
+        }
+
+        let riskElement = document.getElementById("riskStatus");
+        riskElement.innerText = "Risk: " + riskText;
+        riskElement.className = riskClass;
+
+        // Update Graph
+        let time = new Date().toLocaleTimeString();
+        waterData.labels.push(time);
+        waterData.datasets[0].data.push(waterLevel);
+
+        if (waterData.labels.length > 10) {
+            waterData.labels.shift();
+            waterData.datasets[0].data.shift();
+        }
+
+        waterChart.update();
+    }
+
+    // Simulated Data (for demo)
+    setInterval(() => {
+        let randomLevel = Math.floor(Math.random() * 100);
+        updateDashboard(randomLevel);
+    }, 3000);
+
+</script>
+
+</body>
+</html>
